@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,8 +32,7 @@ public class TopicosController {
     private CursoRepository cursoRepository;
 
     @GetMapping
-    public Page<TopicoDto> lista(@RequestParam(required = false) String cursoNome, @RequestParam int pagina, @RequestParam int qtd, @RequestParam String ordenacao) {
-        Pageable paginacao = PageRequest.of(pagina, qtd, Sort.Direction.ASC, ordenacao);
+    public Page<TopicoDto> lista(@RequestParam(required = false) String cursoNome, @PageableDefault(sort = "id", direction = Sort.Direction.ASC, page = 0, size = 10) Pageable paginacao) {
         if (cursoNome == null) {
             Page<Topico> topicos = topicoRepository.findAll(paginacao);
             return TopicoDto.converter(topicos);
