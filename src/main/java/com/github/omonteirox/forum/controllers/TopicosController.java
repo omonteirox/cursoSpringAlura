@@ -8,6 +8,9 @@ import com.github.omonteirox.forum.models.Topico;
 import com.github.omonteirox.forum.repository.CursoRepository;
 import com.github.omonteirox.forum.repository.TopicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,12 +30,13 @@ public class TopicosController {
     private CursoRepository cursoRepository;
 
     @GetMapping
-    public List<TopicoDto> lista(String cursoNome) {
+    public Page<TopicoDto> lista(@RequestParam(required = false) String cursoNome, @RequestParam int pagina, @RequestParam int qtd) {
+        Pageable paginacao = PageRequest.of(pagina, qtd);
         if (cursoNome == null) {
-            List<Topico> topicos = topicoRepository.findAll();
+            Page<Topico> topicos = topicoRepository.findAll(paginacao);
             return TopicoDto.converter(topicos);
         } else {
-            List<Topico> topicos = topicoRepository.findByCursoNome(cursoNome);
+            Page<Topico> topicos = topicoRepository.findByCursoNome(cursoNome, paginacao);
             return TopicoDto.converter(topicos);
         }
     }
@@ -49,8 +53,7 @@ public class TopicosController {
     @GetMapping("/{id}")
     public ResponseEntity<DetalhesTopicoDto> detalhar(@PathVariable Long id) {
         Optional<Topico> topico = topicoRepository.findById(id);
-        if (topico.isPresent())
-            return ResponseEntity.ok(new DetalhesTopicoDto((topico.get())));
+        if (topico.isPresent()) return ResponseEntity.ok(new DetalhesTopicoDto((topico.get())));
         return ResponseEntity.notFound().build();
 
     }
